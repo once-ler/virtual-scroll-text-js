@@ -1,0 +1,8 @@
+build/
+node_modules/
+flow-typed/
+dist/
+static/dist/
+/**/*.log
+**/dist/
+**/lib/

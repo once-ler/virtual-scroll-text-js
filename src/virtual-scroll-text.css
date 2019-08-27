@@ -1,0 +1,26 @@
+.vscrolltext-content {
+  position: relative;
+  border: 1px solid #999;
+  background: #000;
+
+  overflow: auto;
+  height: 200px;
+  width: 320px;
+  flex: 1; 
+  min-width: 0;
+}
+
+.vscrolltext-content span.cell {
+  width: 300px;
+  overflow: visible;
+  max-width: 100%;
+  color: #fff;
+
+  unicode-bidi: embed;
+  font-family: monospace;
+  white-space: pre-wrap;       /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+  white-space: -pre-wrap;      /* Opera 4-6 */
+  white-space: -o-pre-wrap;    /* Opera 7 */
+  word-wrap: break-word;       /* Internet Explorer 5.5+ */
+}

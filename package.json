@@ -1,0 +1,44 @@
+{
+  "name": "virtual-scroll-text-js",
+  "version": "0.1.0",
+  "description": "A simple virtual scroll for viewing large text content",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "npm run build:component:virtualscrolltext && webpack-dev-server --mode development --open",
+    "build:component:virtualscrolltext": "webpack --mode production --config src/webpack.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/once-ler/virtual-scroll-text-js.git"
+  },
+  "keywords": [
+    "virtual",
+    "scroll",
+    "vanilla-js"
+  ],
+  "author": "Henry Tao",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/once-ler/virtual-scroll-text-js/issues"
+  },
+  "homepage": "https://github.com/once-ler/virtual-scroll-text-js#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.5.5",
+    "@babel/core": "^7.5.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
+    "@babel/preset-env": "^7.5.5",
+    "@testing-library/jest-dom": "^4.1.0",
+    "babel-loader": "^8.0.6",
+    "css-loader": "^3.2.0",
+    "html-loader": "^0.5.5",
+    "html-webpack-plugin": "^3.2.0",
+    "jest": "^24.9.0",
+    "optimize-css-assets-webpack-plugin": "^5.0.3",
+    "style-loader": "^1.0.0",
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "webpack": "^4.39.3",
+    "webpack-cli": "^3.3.7",
+    "webpack-dev-server": "^3.8.0"
+  }
+}
