@@ -109,8 +109,8 @@ class VirtualScrollText {
     this.vcontent.onscroll = this.onScrollHandler
     this.vcontainer.appendChild(this.vcontent)
     
-    height && (typeof height === 'number') && (this.vcontent.style.height = height)
-    width && (typeof width === 'number') && (this.vcontent.style.width = width)
+    height && (typeof height === 'number') && (this.vcontent.style.height = `${height}px`)
+    width && (typeof width === 'number') && (this.vcontent.style.width = `${width}px`)
     
     const rect = this.vcontent.getBoundingClientRect()
     this.h = rect.height

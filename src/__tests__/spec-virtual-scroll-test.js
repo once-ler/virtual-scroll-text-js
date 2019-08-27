@@ -1,4 +1,4 @@
-import VirtualScrollText from '../../src/virtual-scroll-text'
+import VirtualScrollText from '../virtual-scroll-text'
 
 describe('Virtual Scroll Text Suite', () => {
   beforeEach(() => {

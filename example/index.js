@@ -1,6 +1,6 @@
 import VirtualScrollText from '../src/virtual-scroll-text'
 
-const vst = new VirtualScrollText({elemId: 'app'})
+const vst = new VirtualScrollText({elemId: 'app', width: 320, height: 200})
 
 // https://jsonplaceholder.typicode.com/comments
 
