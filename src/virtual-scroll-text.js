@@ -90,7 +90,7 @@ class VirtualScrollText {
   }
 
   onPauseButtonClickHandler = e => {
-    const txt = vbutton.innerText
+    const txt = this.vbutton.innerText
     this.vbutton.innerText = txt === 'Pause' ? 'Resume' : 'Pause'
     this.isPaused = txt === 'Pause' ? 1 : 0
   }
