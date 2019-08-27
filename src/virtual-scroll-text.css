@@ -2,6 +2,7 @@
   position: relative;
   border: 1px solid #999;
   background: #000;
+  color: #fff;
 
   overflow: auto;
   height: 200px;
@@ -14,8 +15,7 @@
   width: 300px;
   overflow: visible;
   max-width: 100%;
-  color: #fff;
-
+  
   unicode-bidi: embed;
   font-family: monospace;
   white-space: pre-wrap;       /* Since CSS 2.1 */

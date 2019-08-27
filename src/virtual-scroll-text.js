@@ -57,7 +57,7 @@ class VirtualScrollText {
         const item = chunk[0][1]
         this.vcontent.appendChild(item)
         this.vcontent.removeChild(this.vcontent.firstChild)
-        this.curVp = this.curVp + 1        
+        this.curVp = this.curVp + 1
         this.curScrollHeight = this.vcontent.scrollHeight - (2 * this.h)
         this.vcontent.scrollTop = this.curScrollHeight
         
@@ -103,15 +103,17 @@ class VirtualScrollText {
   }
 
   createViewport = props => {
-    const { height, width } = props
+    const { style } = props
     this.vcontent = document.createElement('div')
     this.vcontent.setAttribute('class', 'vscrolltext-content')
     this.vcontent.onscroll = this.onScrollHandler
     this.vcontainer.appendChild(this.vcontent)
     
-    height && (typeof height === 'number') && (this.vcontent.style.height = `${height}px`)
-    width && (typeof width === 'number') && (this.vcontent.style.width = `${width}px`)
-    
+    if (typeof style === 'object') {
+      for (const prop in style)
+        this.vcontent.style[prop] = style[prop]
+    } 
+
     const rect = this.vcontent.getBoundingClientRect()
     this.h = rect.height
     this.w = rect.width - 10 // 10 for padding.
