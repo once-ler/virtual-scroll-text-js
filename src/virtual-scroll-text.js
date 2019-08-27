@@ -33,7 +33,7 @@ class VirtualScrollText {
 
   onScrollHandler = e => {
     this.isScrolling = 1
-    window.clearTimeout(bumpScrollTop)
+    window.clearTimeout(this.bumpScrollTop)
 
     const st = e.target.scrollTop
     
@@ -56,9 +56,9 @@ class VirtualScrollText {
         const chunk = this.fragments.slice(lastVp + 1)
         const item = chunk[0][1]
         this.vcontent.appendChild(item)
-        this.vcontent.removeChild(vcontent.firstChild)
-        curVp = curVp + 1        
-        this.curScrollHeight = this.vcontent.scrollHeight - (2 * h)
+        this.vcontent.removeChild(this.vcontent.firstChild)
+        this.curVp = this.curVp + 1        
+        this.curScrollHeight = this.vcontent.scrollHeight - (2 * this.h)
         this.vcontent.scrollTop = this.curScrollHeight
         
         this.isVolatile = 0
@@ -67,7 +67,7 @@ class VirtualScrollText {
 
     // Scrolling up.
     if (!this.isVolatile && (this.curScrollHeight - this.curScrollTop + this.h > this.curScrollHeight) && this.curVp > 0) {      
-      isVolatile = 1
+      this.isVolatile = 1
       
       const chunk = this.fragments.slice(this.curVp - 1)
       const item = chunk[0][1]      
@@ -86,7 +86,7 @@ class VirtualScrollText {
       }    
     }
     
-    window.clearTimeout(onScrollTimer);    
+    window.clearTimeout(this.onScrollTimer);    
   }
 
   onPauseButtonClickHandler = e => {
@@ -107,14 +107,14 @@ class VirtualScrollText {
     this.vcontent = document.createElement('div')
     this.vcontent.setAttribute('class', 'vscrolltext-content')
     this.vcontent.onscroll = this.onScrollHandler
-
+    this.vcontainer.appendChild(this.vcontent)
+    
     height && (typeof height === 'number') && (this.vcontent.style.height = height)
     width && (typeof width === 'number') && (this.vcontent.style.width = width)
     
-    const rect = this.vcontent.getBoundingClientRect();
+    const rect = this.vcontent.getBoundingClientRect()
     this.h = rect.height
     this.w = rect.width - 10 // 10 for padding.
-    this.vcontainer.appendChild(this.vcontent)
     return this
   }
 
@@ -135,7 +135,7 @@ class VirtualScrollText {
 
   createRow = (idx, data) => {
     var itemText = document.createTextNode(data);
-    item = document.createElement('span');
+    const item = document.createElement('span');
     item.setAttribute('class', 'cell');
     item.dataset.idx = idx 
     item.appendChild(itemText);
@@ -146,9 +146,9 @@ class VirtualScrollText {
     const tSz = text.length;
     const arrStr = text.split('')    
     const newlines = (text.match(/\n/g) || []).length
-    const newlineSz = newlines * Math.ceil(w / lsz)    
-    const reqSz = (tSz * lsz) + newlineSz
-    const cellSz = Math.ceil((w * h) / lsz)
+    const newlineSz = newlines * Math.ceil(this.w / this.lsz)    
+    const reqSz = (tSz * this.lsz) + newlineSz
+    const cellSz = Math.ceil((this.w * this.h) / this.lsz)
     const chunks = Math.ceil(reqSz / cellSz)
     const chunkSz = Math.ceil(tSz / chunks)
     return {arrStr, chunks, chunkSz}
@@ -159,7 +159,7 @@ class VirtualScrollText {
       const rm = arrStr.splice(0, chunkSz);
       const len = this.fragments.length
       const next = rm.join('')
-      const item = createRow(len, next)      
+      const item = this.createRow(len, next)
       this.fragments.push([len, item])
     }
   }
@@ -177,8 +177,8 @@ class VirtualScrollText {
       }
 
       // Get the last items of the stack.
-      curVp = this.fragments.length > maxVp ? this.fragments.length - maxVp : this.fragments.length
-      const chunk = this.fragments.slice(curVp === 1 ? 0 : curVp)
+      this.curVp = this.fragments.length > this.maxVp ? this.fragments.length - this.maxVp : this.fragments.length
+      const chunk = this.fragments.slice(this.curVp === 1 ? 0 : this.curVp)
       
       for (let i = 0; i < chunk.length; i++) {
         const item = chunk[i][1]
@@ -197,7 +197,6 @@ class VirtualScrollText {
       const next = this.queue.shift()
       const task = this.recalc(next)
       this.createFragments(task)
-
       this.renderChunk()
     }, 500)
   }
