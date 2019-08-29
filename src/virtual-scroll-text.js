@@ -45,6 +45,7 @@ class VirtualScrollText {
 
   onStoppedScrolling = () => {
     this.isScrolling = 0
+    const nextScrollHeight = this.vcontent.scrollHeight - (2 * this.h)
 
     // Scrolling down.
     if ((this.curScrollTop + this.h + 20 > this.curScrollHeight)) {
@@ -58,15 +59,25 @@ class VirtualScrollText {
         this.vcontent.appendChild(item)
         this.vcontent.removeChild(this.vcontent.firstChild)
         this.curVp = this.curVp + 1
-        this.curScrollHeight = this.vcontent.scrollHeight - (2 * this.h)
-        this.vcontent.scrollTop = this.curScrollHeight
         
+        let nextScrollTop = nextScrollHeight
+        if (nextScrollHeight > 0) {
+          this.curScrollHeight = nextScrollHeight
+        } else {
+          // Not a lot text.  Keep curScrollHeight the same and adjust nextScrollTop to 2/3 of scrollHeight.
+          nextScrollTop = Math.floor(this.vcontent.scrollHeight / 3)
+        }
+        this.vcontent.scrollTop = nextScrollTop        
         this.isVolatile = 0
       }
     }
 
     // Scrolling up.
-    if (!this.isVolatile && (this.curScrollHeight - this.curScrollTop + this.h > this.curScrollHeight) && this.curVp > 0) {      
+    const shouldScrollUp = nextScrollHeight > 0 
+      ? (this.curScrollHeight - this.curScrollTop + this.h > this.curScrollHeight)
+      : Math.floor(0.1 * this.curScrollHeight) >= this.curScrollTop 
+
+    if (!this.isVolatile && shouldScrollUp && this.curVp > 0) {  
       this.isVolatile = 1
       
       const chunk = this.fragments.slice(this.curVp - 1)
@@ -153,6 +164,11 @@ class VirtualScrollText {
     const cellSz = Math.ceil((this.w * this.h) / this.lsz)
     const chunks = Math.ceil(reqSz / cellSz)
     const chunkSz = Math.ceil(tSz / chunks)
+    
+    // Increase viewport viewable items if text is tiny.
+    if (cellSz >= reqSz)
+      this.maxVp = Math.ceil(cellSz/reqSz)
+    
     return {arrStr, chunks, chunkSz}
   }
 

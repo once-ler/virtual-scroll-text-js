@@ -19,9 +19,6 @@ const vst2 = new VirtualScrollText({elemId: 'app2',
 var loremIpsum1 = 
 `
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, ...
-
-
-
 `
 
 let produceCount = 1000
