@@ -45,8 +45,10 @@ class VirtualScrollText {
 
   onStoppedScrolling = () => {
     this.isScrolling = 0
-    const nextScrollHeight = this.vcontent.scrollHeight - (2 * this.h)
-
+    // Depending on where scrollTop is, slices of viewport will be removed.
+    // Tentatively calculate next scrollHeight by subtracting half of max viewport slices allowed.
+    const nextScrollHeight = this.vcontent.scrollHeight - (Math.ceil(this.maxVp/2) * this.h)
+    
     // Scrolling down.
     if ((this.curScrollTop + this.h + 20 > this.curScrollHeight)) {
       const lastVp = parseInt(this.vcontent.lastElementChild.dataset.idx)
@@ -188,10 +190,12 @@ class VirtualScrollText {
         return
 
       // Remove all content.
-      let child = this.vcontent.lastElementChild
-      while (child) {
-        this.vcontent.removeChild(child)
-        child = this.vcontent.lastElementChild
+      if (this.fragments.length > this.maxVp) {
+        let child = this.vcontent.lastElementChild
+        while (child) {
+          this.vcontent.removeChild(child)
+          child = this.vcontent.lastElementChild
+        }
       }
 
       // Get the last items of the stack.
@@ -216,7 +220,7 @@ class VirtualScrollText {
       const task = this.recalc(next)
       this.createFragments(task)
       this.renderChunk()
-    }, 500)
+    }, 400)
   }
   
   publish = text => { this.queue.push(text) }
