@@ -37,3 +37,18 @@ const producer = setInterval(() => {
 
   produceCount--
 }, 100)
+
+const vst3 = new VirtualScrollText({elemId: 'app3', 
+  style: { width: '320px', height: '200px', backgroundColor: 'green' }
+})
+
+let produceCount2 = 1000
+
+const producer2 = setInterval(() => {
+  vst3.publish('ab')
+
+  if (produceCount2 === 0)
+    clearInterval(producer2)
+
+  produceCount2--
+}, 200)

@@ -158,6 +158,9 @@ class VirtualScrollText {
   }
 
   recalc = text => {
+    if (text.length < this.w)
+      text += '\n'
+
     const tSz = text.length;
     const arrStr = text.split('')    
     const newlines = (text.match(/\n/g) || []).length
@@ -168,9 +171,9 @@ class VirtualScrollText {
     const chunkSz = Math.ceil(tSz / chunks)
     
     // Increase viewport viewable items if text is tiny.
-    if (cellSz >= reqSz)
+    if (cellSz >= reqSz && Math.ceil(cellSz/reqSz) > Math.ceil(this.h/(newlineSz || 1)))
       this.maxVp = Math.ceil(cellSz/reqSz)
-    
+      
     return {arrStr, chunks, chunkSz}
   }
 
