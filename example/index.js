@@ -12,6 +12,7 @@ fetch(nycsubwayentrances).then(function(response) {
   })
 })
 
+/*
 const vst2 = new VirtualScrollText({elemId: 'app2', 
   style: { width: '320px', height: '200px', backgroundColor: 'blue' }
 })
@@ -37,18 +38,19 @@ const producer = setInterval(() => {
 
   produceCount--
 }, 100)
+*/
 
 const vst3 = new VirtualScrollText({elemId: 'app3', 
   style: { width: '320px', height: '200px', backgroundColor: 'green' }
 })
 
-let produceCount2 = 1000
+let produceCount2 = 150
 
 const producer2 = setInterval(() => {
-  vst3.publish('ab')
+  vst3.publish(`(${150 - produceCount2})`)
 
   if (produceCount2 === 0)
     clearInterval(producer2)
 
   produceCount2--
-}, 200)
+}, 100)

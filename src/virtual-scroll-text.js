@@ -8,11 +8,14 @@ class VirtualScrollText {
   onScrollTimer = null
   curScrollTop = 0
   curScrollHeight = 0
-  maxVp = 4
+  maxVp = 4 // Default viewport rows.
+  maxVpMax = 0 // Maximum allowed viewport rows when recalulated.
   curVp = 0
-  bumpScrollTop = null
   isVolatile = 0
   isScrolling = 0
+  numOfCharPerLine = 0
+  cellSz = 0
+  bumpScrollTop = null // Pointer to scrollTop timeout function.
   vcontainer = null
   vcontent = null
   vbutton = null
@@ -80,22 +83,24 @@ class VirtualScrollText {
       : Math.floor(0.1 * this.curScrollHeight) >= this.curScrollTop 
 
     if (!this.isVolatile && shouldScrollUp && this.curVp > 0) {  
-      this.isVolatile = 1
-      
       const chunk = this.fragments.slice(this.curVp - 1)
-      const item = chunk[0][1]      
-      this.vcontent.insertBefore(item, this.vcontent.firstChild)
-      this.vcontent.removeChild(this.vcontent.lastElementChild)      
-      this.curVp = this.curVp - 1
-      this.curScrollHeight = this.vcontent.scrollHeight
+      const item = chunk[0][1]
       
-      if (this.curScrollTop === 0) {
-        this.bumpScrollTop = setTimeout(() => { 
-          this.vcontent.scrollTop = this.curScrollTop + 20
-          this.isVolatile = 0   
-        }, 100)
-      } else {
-        this.isVolatile = 0
+      if ((1 * item.dataset.idx) < (1 * this.vcontent.firstChild.dataset.idx)) {      
+        this.isVolatile = 1
+        this.vcontent.insertBefore(item, this.vcontent.firstChild)
+        this.vcontent.removeChild(this.vcontent.lastElementChild)      
+        this.curVp = this.curVp - 1
+        this.curScrollHeight = this.vcontent.scrollHeight
+        
+        if (this.curScrollTop === 0) {
+          this.bumpScrollTop = setTimeout(() => { 
+            this.vcontent.scrollTop = this.curScrollTop + 20
+            this.isVolatile = 0   
+          }, 100)
+        } else {
+          this.isVolatile = 0
+        }
       }    
     }
     
@@ -130,6 +135,9 @@ class VirtualScrollText {
     const rect = this.vcontent.getBoundingClientRect()
     this.h = rect.height
     this.w = rect.width - 10 // 10 for padding.
+    this.numOfCharPerLine = Math.ceil(this.w / this.lsz)
+    this.cellSz = Math.ceil((this.w * this.h) / this.lsz)
+    this.maxVpMax = 1.5 * Math.ceil(this.h / this.lsz)
     return this
   }
 
@@ -158,32 +166,41 @@ class VirtualScrollText {
   }
 
   recalc = text => {
-    if (text.length < this.w)
-      text += '\n'
-
     const tSz = text.length;
     const arrStr = text.split('')    
     const newlines = (text.match(/\n/g) || []).length
-    const newlineSz = newlines * Math.ceil(this.w / this.lsz)    
+    const newlineSz = newlines * this.numOfCharPerLine    
     const reqSz = (tSz * this.lsz) + newlineSz
-    const cellSz = Math.ceil((this.w * this.h) / this.lsz)
-    const chunks = Math.ceil(reqSz / cellSz)
+    const chunks = Math.ceil(reqSz / this.cellSz)
     const chunkSz = Math.ceil(tSz / chunks)
     
     // Increase viewport viewable items if text is tiny.
-    if (cellSz >= reqSz && Math.ceil(cellSz/reqSz) > Math.ceil(this.h/(newlineSz || 1)))
-      this.maxVp = Math.ceil(cellSz/reqSz)
+    if (this.cellSz >= reqSz) {
+      const nextMaxVp = Math.ceil(this.cellSz/reqSz)
+      this.maxVp = nextMaxVp > this.maxVpMax ? this.maxVpMax : nextMaxVp
+    }
       
     return {arrStr, chunks, chunkSz}
   }
 
   createFragments = ({arrStr, chunks, chunkSz}) => {
     for (let i = 0; i < chunks; i++) {
+      // Get last fragment in the stack.
+      const count = this.fragments.length
+      const lastFragment = count === 0 ? undefined : this.fragments[count - 1]
       const rm = arrStr.splice(0, chunkSz);
-      const len = this.fragments.length
       const next = rm.join('')
-      const item = this.createRow(len, next)
-      this.fragments.push([len, item])
+      const nextLen = next.length
+
+      if (lastFragment && lastFragment[0] < this.numOfCharPerLine) {
+        const el = lastFragment[1]
+        el.innerText += next
+        lastFragment[0] = lastFragment[0] + nextLen 
+      } else {
+        const item = this.createRow(count, next)
+        this.fragments.push([nextLen, item])
+      }
+      
     }
   }
 
@@ -192,8 +209,10 @@ class VirtualScrollText {
       if (this.isScrolling)
         return
 
+      const len = this.fragments.length
+
       // Remove all content.
-      if (this.fragments.length > this.maxVp) {
+      if (len > this.maxVp) {
         let child = this.vcontent.lastElementChild
         while (child) {
           this.vcontent.removeChild(child)
@@ -202,9 +221,9 @@ class VirtualScrollText {
       }
 
       // Get the last items of the stack.
-      this.curVp = this.fragments.length > this.maxVp ? this.fragments.length - this.maxVp : this.fragments.length
-      const chunk = this.fragments.slice(this.curVp === 1 ? 0 : this.curVp)
-      
+      this.curVp = len > this.maxVp ? len - this.maxVp : len
+      const chunk = this.fragments.slice(this.curVp === len ? 0 : this.curVp)
+
       for (let i = 0; i < chunk.length; i++) {
         const item = chunk[i][1]
         this.vcontent.appendChild(item)
@@ -223,7 +242,7 @@ class VirtualScrollText {
       const task = this.recalc(next)
       this.createFragments(task)
       this.renderChunk()
-    }, 400)
+    }, 100)
   }
   
   publish = text => { this.queue.push(text) }
