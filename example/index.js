@@ -12,7 +12,6 @@ fetch(nycsubwayentrances).then(function(response) {
   })
 })
 
-/*
 const vst2 = new VirtualScrollText({elemId: 'app2', 
   style: { width: '320px', height: '200px', backgroundColor: 'blue' }
 })
@@ -38,7 +37,6 @@ const producer = setInterval(() => {
 
   produceCount--
 }, 100)
-*/
 
 const vst3 = new VirtualScrollText({elemId: 'app3', 
   style: { width: '320px', height: '200px', backgroundColor: 'green' }
