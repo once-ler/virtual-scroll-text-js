@@ -1,5 +1,5 @@
 import VirtualScrollText from '../src/virtual-scroll-text'
-
+/*
 const vst = new VirtualScrollText({elemId: 'app', 
   style: { width: '420px', height: '200px', color: 'green', abc: 1 }
 })
@@ -11,7 +11,7 @@ fetch(nycsubwayentrances).then(function(response) {
     vst.publish(text)
   })
 })
-
+*/
 const vst2 = new VirtualScrollText({elemId: 'app2', 
   style: { width: '320px', height: '200px', backgroundColor: 'blue' }
 })
@@ -51,4 +51,19 @@ const producer2 = setInterval(() => {
     clearInterval(producer2)
 
   produceCount2--
+}, 100)
+
+const vst4 = new VirtualScrollText({elemId: 'app4', 
+  style: { width: '320px', height: '200px', backgroundColor: 'purple' }
+})
+
+let produceCount3 = 100
+
+const producer3 = setInterval(() => {
+  vst4.publish(`Timeout\n`)
+
+  if (produceCount3 === 0)
+    clearInterval(producer3)
+
+  produceCount3--
 }, 100)

@@ -24,3 +24,22 @@
   white-space: -o-pre-wrap;    /* Opera 7 */
   word-wrap: break-word;       /* Internet Explorer 5.5+ */
 }
+
+.vscrolltext-control-container {
+  display: flex;
+  margin-top: 6px;
+}
+
+.vscrolltext-control-cascade-container {
+  display: flex;
+  visibility: collapse;
+  margin-left: 6px;
+}
+
+.vscrolltext-control-cascade-container.visible {
+  visibility: visible;
+}
+
+.vscrolltext-control-cascade-container button {
+  margin-right: 5px;
+}

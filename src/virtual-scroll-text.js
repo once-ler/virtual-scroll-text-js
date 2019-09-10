@@ -18,7 +18,11 @@ class VirtualScrollText {
   bumpScrollTop = null // Pointer to scrollTop timeout function.
   vcontainer = null
   vcontent = null
-  vbutton = null
+  vbuttonPause = null
+  vbuttonScrollBegin = null
+  vbuttonScrollEnd = null
+  vcontrolContainer = null
+  vcontrolCascadeContainer = null
   consumer = null
   
   constructor(props = {}, elem) {
@@ -28,7 +32,11 @@ class VirtualScrollText {
 
     this.createContainer(props, elem)
       .createViewport(props)
+      .createControlContainer()
       .createPauseButton()
+      .createControlCascadeContainer()
+      .createScrollBeginButton()
+      .createScrollEndButton()
       .removeWhitespaceFromViewport()
 
     this.listen()
@@ -93,14 +101,10 @@ class VirtualScrollText {
         this.curVp = this.curVp - 1
         this.curScrollHeight = this.vcontent.scrollHeight
         
-        if (this.curScrollTop === 0) {
-          this.bumpScrollTop = setTimeout(() => { 
-            this.vcontent.scrollTop = this.curScrollTop + 20
-            this.isVolatile = 0   
-          }, 100)
-        } else {
-          this.isVolatile = 0
-        }
+        if (this.curScrollTop === 0)
+          this.vcontent.scrollTop = this.curScrollTop + 20
+
+        this.isVolatile = 0
       }    
     }
     
@@ -108,15 +112,39 @@ class VirtualScrollText {
   }
 
   onPauseButtonClickHandler = e => {
-    const txt = this.vbutton.innerText
-    this.vbutton.innerText = txt === 'Pause' ? 'Resume' : 'Pause'
+    const txt = this.vbuttonPause.innerText
+    this.vbuttonPause.innerText = txt === 'Pause' ? 'Resume' : 'Pause'
     this.isPaused = txt === 'Pause' ? 1 : 0
+    this.vcontrolCascadeContainer.classList.toggle('visible')
   }
 
   createContainer = (props, elem) => {
     const {elemId} = props
     this.vcontainer = elem || document.getElementById(elemId)
     this.vcontainer.setAttribute('class', 'vscrolltext-container')
+    return this
+  }
+
+  resetStyle = style => {
+    if (typeof style !== 'object')
+      return this
+
+    for (const prop in style)
+      this.vcontent.style[prop] = style[prop]
+
+    return this
+  }
+
+  resizeViewport = style => {
+    this.resetStyle(style)
+
+    const rect = this.vcontent.getBoundingClientRect()
+    this.h = rect.height
+    this.w = rect.width - 10 // 10 for padding.
+    this.numOfCharPerLine = Math.ceil(this.w / this.lsz)
+    this.cellSz = Math.ceil((this.w * this.h) / this.lsz)
+    this.maxVpMax = 1.5 * Math.ceil(this.h / this.lsz)
+
     return this
   }
 
@@ -127,26 +155,47 @@ class VirtualScrollText {
     this.vcontent.onscroll = this.onScrollHandler
     this.vcontainer.appendChild(this.vcontent)
     
-    if (typeof style === 'object') {
-      for (const prop in style)
-        this.vcontent.style[prop] = style[prop]
-    } 
+    return this.resizeViewport(style)
+  }
 
-    const rect = this.vcontent.getBoundingClientRect()
-    this.h = rect.height
-    this.w = rect.width - 10 // 10 for padding.
-    this.numOfCharPerLine = Math.ceil(this.w / this.lsz)
-    this.cellSz = Math.ceil((this.w * this.h) / this.lsz)
-    this.maxVpMax = 1.5 * Math.ceil(this.h / this.lsz)
+  createControlContainer = () => {
+    this.vcontrolContainer = document.createElement('div')
+    this.vcontrolContainer.setAttribute('class', 'vscrolltext-control-container')    
+    this.vcontainer.appendChild(this.vcontrolContainer)
+    return this
+  }
+
+  createControlCascadeContainer = () => {
+    this.vcontrolCascadeContainer = document.createElement('div')
+    this.vcontrolCascadeContainer.setAttribute('class', 'vscrolltext-control-cascade-container')
+    this.vcontrolContainer.appendChild(this.vcontrolCascadeContainer)
     return this
   }
 
   createPauseButton = () => {
-    this.vbutton = document.createElement('button')
-    this.vbutton.setAttribute('class', 'vscrolltext-button')
-    this.vbutton.appendChild(document.createTextNode('Pause'))
-    this.vbutton.onclick = this.onPauseButtonClickHandler
-    this.vcontainer.appendChild(this.vbutton)
+    this.vbuttonPause = document.createElement('button')
+    this.vbuttonPause.setAttribute('class', 'vscrolltext-button')
+    this.vbuttonPause.appendChild(document.createTextNode('Pause'))
+    this.vbuttonPause.onclick = this.onPauseButtonClickHandler
+    this.vcontrolContainer.appendChild(this.vbuttonPause)
+    return this
+  }
+
+  createScrollBeginButton = () => {
+    this.vbuttonScrollBegin = document.createElement('button')
+    this.vbuttonScrollBegin.setAttribute('class', 'vscrolltext-button')
+    this.vbuttonScrollBegin.appendChild(document.createTextNode('First'))
+    this.vbuttonScrollBegin.onclick = e => this.renderBegin()
+    this.vcontrolCascadeContainer.appendChild(this.vbuttonScrollBegin)
+    return this
+  }
+
+  createScrollEndButton = () => {
+    this.vbuttonScrollEnd = document.createElement('button')
+    this.vbuttonScrollEnd.setAttribute('class', 'vscrolltext-button')
+    this.vbuttonScrollEnd.appendChild(document.createTextNode('Last'))
+    this.vbuttonScrollEnd.onclick = e => this.renderChunk()
+    this.vcontrolCascadeContainer.appendChild(this.vbuttonScrollEnd)
     return this
   }
 
@@ -230,6 +279,37 @@ class VirtualScrollText {
       }
       
       this.vcontent.scrollTop = this.vcontent.scrollHeight
+    }, 100)
+  }
+
+  renderBegin = () => {
+    setTimeout(() => {
+      if (this.isScrolling)
+        return
+
+      const len = this.fragments.length
+
+      // Remove all content.
+      if (len > this.maxVp) {
+        let child = this.vcontent.lastElementChild
+        while (child) {
+          this.vcontent.removeChild(child)
+          child = this.vcontent.lastElementChild
+        }
+      }
+
+      // Get the first items of the stack.
+      const sz = len > this.maxVp ? len - this.maxVp : len
+      this.curVp = 0
+      
+      const chunk = this.fragments.slice(0, sz)
+
+      for (let i = 0; i < chunk.length; i++) {
+        const item = chunk[i][1]
+        this.vcontent.appendChild(item)
+      }
+      
+      this.vcontent.scrollTop = 0
     }, 100)
   }
 
