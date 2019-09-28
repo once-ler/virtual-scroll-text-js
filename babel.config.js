@@ -19,6 +19,7 @@ module.exports = function (api) {
 
   return {
     presets,
-    plugins
+    plugins,
+    "comments": false
   };
 }
