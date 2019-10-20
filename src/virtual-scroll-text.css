@@ -3,12 +3,12 @@
   border: 1px solid #999;
   background: #000;
   color: #fff;
-
   overflow: auto;
   height: 200px;
   width: 320px;
   flex: 1; 
   min-width: 0;
+  flex-direction: column !important;
 }
 
 .vscrolltext-content span.cell {
